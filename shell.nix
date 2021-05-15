@@ -4,5 +4,5 @@ let
 in
 pkgs.mkShell {
   # nativeBuildInputs is usually what you want -- tools you need to run
-  nativeBuildInputs = with pkgs.buildPackages; [ go protoc-gen-go ];
+  nativeBuildInputs = with pkgs.buildPackages; [ go protoc-gen-go protobuf ];
 }

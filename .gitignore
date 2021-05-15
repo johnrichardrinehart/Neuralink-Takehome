@@ -1,2 +1,3 @@
 # build output
 Neuralink-Takehome
+*.pb.go
