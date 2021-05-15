@@ -7,14 +7,11 @@ import (
 	"net"
 	"strconv"
 
+	server "github.com/johnrichardrinehart/Neuralink-Takehome/server/pkg"
+
 	pb "github.com/johnrichardrinehart/Neuralink-Takehome/proto"
 	"google.golang.org/grpc"
 )
-
-// server is used to implement image.NLImageServiceServer
-type server struct {
-	pb.UnimplementedNLImageServiceServer
-}
 
 func main() {
 	var (
@@ -42,7 +39,9 @@ func main() {
 		log.Printf("gRPC server successfully created (listening at %s:%s)", host, port)
 	}
 
-	pb.RegisterNLImageServiceServer(s, &server{})
+	pb.RegisterNLImageServiceServer(s, &server.Server{
+		Debug: debug,
+	})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
