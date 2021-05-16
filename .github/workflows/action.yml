@@ -1,10 +1,6 @@
 name: "Cachix"
-
 on:
-  pull_request:
   push:
-  workflow_dispatch:
-
 jobs:
   builds:
     name: Build configuration
@@ -19,3 +15,10 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
     - run: nix build .#defaultPackage.x86_64-linux
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          ./result/bin/server
+          ./result/bin/client
