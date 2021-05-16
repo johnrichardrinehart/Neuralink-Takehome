@@ -6,6 +6,15 @@ pkgs.buildGoModule rec {
   pname = "Neuralink-Takehome";
   version = "0.3.4";
 
+  nativeBuildInputs = with pkgs.buildPackages; [ go protobuf protoc-gen-go protoc-gen-go-grpc ];
+
+  preBuild = ''
+  ${pkgs.protobuf}/bin/protoc --proto_path=./proto \
+	--go_out=./proto --go_opt=Mimage.proto="/;image" \
+	--go-grpc_out=./proto --go-grpc_opt=paths=source_relative --go-grpc_opt=Mimage.proto=/ \
+	./proto/image.proto
+  '';
+
   src = ./.;
 
   meta = with lib; {
