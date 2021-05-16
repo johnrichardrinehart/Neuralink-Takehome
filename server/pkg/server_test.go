@@ -63,11 +63,76 @@ func TestMain(m *testing.M) {
 }
 
 func TestRotateImage(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	_, err := client.RotateImage(ctx, &pb.NLImageRotateRequest{Rotation: 0, Image: &pb.NLImage{Color: true, Data: nil, Width: 0, Height: 0}})
-	if err != nil {
-		t.Fatalf("RotateImage failed: %v", err)
+	threeByThreeGrayscale := &pb.NLImage{
+		Color:  false,
+		Data:   []byte{0, 1, 2, 3, 4, 5, 6, 7, 8},
+		Width:  3,
+		Height: 3,
+	}
+
+	// threeByThreeColor := &pb.NLImage{
+	// 	Color:  true,
+	// 	Data:   []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26},
+	// 	Width:  3,
+	// 	Height: 3,
+	// }
+
+	tt := []struct {
+		name         string
+		req          *pb.NLImageRotateRequest
+		expBytes     []byte
+		expError     bool
+		errSubstring string
+	}{
+		{
+			"0 degree rotation - 3x3 grayscale",
+			&pb.NLImageRotateRequest{
+				Rotation: pb.NLImageRotateRequest_NONE,
+				Image:    threeByThreeGrayscale,
+			},
+			threeByThreeGrayscale.Data,
+			false,
+			"",
+		},
+		{
+			"90 degree ccw rotation - 3x3 grayscale",
+			&pb.NLImageRotateRequest{
+				Rotation: pb.NLImageRotateRequest_NINETY_DEG,
+				Image:    threeByThreeGrayscale,
+			},
+			[]byte{2, 5, 8, 1, 4, 7, 0, 3, 8},
+			false,
+			"",
+		},
+	}
+
+	for _, tst := range tt {
+		t.Run(tst.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			resp, err := client.RotateImage(ctx, tst.req)
+
+			if err != nil {
+				if !tst.expError {
+					t.Fatalf("encountered an error when none was expected: %s", err)
+				}
+				if !strings.Contains(err.Error(), tst.errSubstring) {
+					t.Fatalf("unexpected error string encountered - expected %s - got %s", tst.errSubstring, err)
+				}
+			} else {
+				if tst.expError {
+					t.Fatalf("failed to encounter an error when the following was expected: %s", tst.errSubstring)
+				}
+			}
+
+			for i, v := range tst.expBytes {
+				t.Logf("got: %d - exp: %d", v, tst.expBytes[i])
+				if v != resp.Data[i] {
+					t.Fatal("failed to rotate properly")
+				}
+			}
+		})
 	}
 }
 
