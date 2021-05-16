@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"image"
 	"log"
 	"math"
@@ -28,12 +29,14 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 	h := int(req.Image.Height) // WARNING: int32 -> int; should be fine for most systems
 	w := int(req.Image.Width)  // WARNING: int32 -> int; should be fine for most systems
 	c := req.Image.Color
-	if (c && len(req.Image.Data) != 3*h*w) || len(req.Image.Data) != h*w {
-		return nil, errors.New("invalid data length - should be a 3x or 1x multiple of height*width")
+
+	if err := validateImage(req.Image); err != nil {
+		return nil, fmt.Errorf("image failed to validate: %s", err)
 	}
 
 	// coerce the input image into RGBa format to re-use stdlib
 	var imga []byte
+
 	if !c {
 		imga = make([]byte, 2*h*w)
 		for i, v := range req.Image.Data {
@@ -70,5 +73,21 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 		log.Printf("received request to filter an image")
 	}
 
+	if err := validateImage(img); err != nil {
+		return nil, fmt.Errorf("image failed to validate: %s", err)
+	}
+
 	return img, nil
+}
+
+func validateImage(img *pb.NLImage) error {
+	h := int(img.Height) // WARNING: int32 -> int; should be fine for most systems
+	w := int(img.Width)  // WARNING: int32 -> int; should be fine for most systems
+	c := img.Color
+
+	if (c && len(img.Data) != 3*h*w) || len(img.Data) != h*w {
+		return errors.New("invalid data length - should be a 3x or 1x multiple of height*width")
+	}
+
+	return nil
 }
