@@ -32,7 +32,7 @@ func main() {
 	flag.StringVar(&host, "host", "localhost", "server host")
 	flag.StringVar(&input, "input", "in.jpg", "path to the input file")
 	flag.StringVar(&output, "output", "out.jpg", "path to the output file")
-	flag.StringVar(&rotate, "rotate", "NONE", "counterclockwise rotation angle: NONE, NINETY_DEG, ONE_EIGHTY_DEG, TWO_SEVENTY_DEG")
+	flag.StringVar(&rotate, "rotate", "NONE", `counterclockwise rotation angle: one of "NONE", "NINETY_DEG", "ONE_EIGHTY_DEG", "TWO_SEVENTY_DEG"`)
 	flag.BoolVar(&mean, "mean", false, "boolean option to apply mean filter to image")
 	flag.Parse()
 
