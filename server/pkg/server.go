@@ -115,8 +115,8 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 
 		// color loop
 		for c := 0; c < stride; c += 1 {
-			acc := img.Data[i+c] // accumulator
-			cnt := 1             // initial weight
+			acc := int(img.Data[i+c]) // accumulator
+			cnt := 1                  // initial weight
 			for _, n := range neighbors {
 				co := n[0] // col displacement
 				ro := n[1] // row displacement
@@ -132,7 +132,7 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 				ni := XYToI(ix+co, iy+ro, stride, c, w)
 
 				cnt += 1
-				acc += img.Data[ni]
+				acc += int(img.Data[ni])
 			}
 			// calculate the mean
 			mean[i+c] = byte(int(acc) / cnt)
