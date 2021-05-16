@@ -102,7 +102,7 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 			ro := n[0]                                // row offset
 			co := n[1]                                // col offset
 			j := (row-ro)*int(img.Width) + (col + co) // WARNING: cast could break on extremely large widths
-			if j < 0 || j > len(img.Data) {
+			if j < 0 || j > len(img.Data)-1 {
 				continue
 			}
 			cnt += 1
@@ -113,22 +113,6 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 
 	return img, nil
 }
-
-// var calculateAverage = function(matrix, i, j) {
-//     let neighbors = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]];
-//     let sum = matrix[i][j];
-//     let count = 1;
-
-//     for (let [x, y] of neighbors) {
-//         let row = i + x;
-//         let col = j + y;
-//         if (row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length) {
-//             sum += matrix[row][col];
-//             count++;
-//         }
-//     }
-//     return Math.floor(sum / count);
-// }
 
 func validateImage(img *pb.NLImage) error {
 	h := int(img.Height) // WARNING: int32 -> int; should be fine for most systems

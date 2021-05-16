@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -71,10 +72,62 @@ func TestRotateImage(t *testing.T) {
 }
 
 func TestMeanFilter(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	_, err := client.MeanFilter(ctx, &pb.NLImage{Color: true, Data: nil, Width: 0, Height: 0})
-	if err != nil {
-		t.Fatalf("RotateImage failed: %v", err)
+	tt := []struct {
+		name         string
+		img          *pb.NLImage
+		expBytes     []byte
+		expError     bool
+		errSubstring string
+	}{
+		{
+			"3x3 - no color",
+			&pb.NLImage{
+				Color:  false,
+				Data:   []byte{0, 1, 2, 3, 4, 5, 6, 7, 8},
+				Width:  3,
+				Height: 3,
+			},
+			[]byte{
+				(0 + 1 + 3 + 4) / 4,
+				(0 + 1 + 2 + 3 + 4 + 5) / 6,
+				(1 + 2 + 4 + 5) / 4,
+				(0 + 1 + 3 + 4 + 6 + 7) / 6,
+				(0 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 9,
+				(1 + 2 + 4 + 5 + 7 + 8) / 6,
+				(3 + 4 + 6 + 7) / 4,
+				(3 + 4 + 5 + 6 + 7 + 8) / 6,
+				(4 + 5 + 7 + 8) / 4,
+			},
+			false,
+			"",
+		},
+	}
+
+	for _, tst := range tt {
+		t.Run(tst.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			resp, err := client.MeanFilter(ctx, tst.img)
+
+			if err != nil {
+				if !tst.expError {
+					t.Fatalf("encountered an error when none was expected: %s", err)
+				}
+				if !strings.Contains(err.Error(), tst.errSubstring) {
+					t.Fatalf("unexpected error string encountered - expected %s - got %s", tst.errSubstring, err)
+				}
+			} else {
+				if tst.expError {
+					t.Fatalf("failed to encounter an error when the following was expected: %s", tst.errSubstring)
+				}
+			}
+
+			for i, v := range resp.Data {
+				if v != resp.Data[i] {
+					t.Fatal("failed to calculate the mean properly")
+				}
+			}
+		})
 	}
 }
