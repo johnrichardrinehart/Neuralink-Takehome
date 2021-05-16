@@ -1,10 +1,9 @@
 # from https://github.com/tweag/gomod2nix
 { pkgs ? import <nixpkgs> { }, lib ? import <nixpkgs/lib> }:
-
 pkgs.buildGoModule rec {
   vendorSha256 = "d7hDDUl3MGiZRw7oOqBAIIdCIod9IRm4i+EhQMnKjm8=";
   pname = "Neuralink-Takehome";
-  version = "0.3.4";
+  version = "1.0.2";
 
   nativeBuildInputs = with pkgs.buildPackages; [ go protobuf protoc-gen-go protoc-gen-go-grpc ];
 
