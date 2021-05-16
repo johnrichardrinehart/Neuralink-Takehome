@@ -57,9 +57,6 @@ func TestMain(m *testing.M) {
 	}
 
 	s.GracefulStop()
-	if err := lis.Close(); err != nil {
-		log.Printf("server listener failed to close: %s", err)
-	}
 
 	os.Exit(exitCode)
 }
@@ -68,6 +65,15 @@ func TestRotateImage(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_, err := client.RotateImage(ctx, &pb.NLImageRotateRequest{Rotation: 0, Image: &pb.NLImage{Color: true, Data: nil, Width: 0, Height: 0}})
+	if err != nil {
+		t.Fatalf("RotateImage failed: %v", err)
+	}
+}
+
+func TestMeanFilter(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err := client.MeanFilter(ctx, &pb.NLImage{Color: true, Data: nil, Width: 0, Height: 0})
 	if err != nil {
 		t.Fatalf("RotateImage failed: %v", err)
 	}
