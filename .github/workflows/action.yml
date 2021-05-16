@@ -16,8 +16,8 @@ jobs:
           experimental-features = nix-command flakes
     - run: nix build .#defaultPackage.x86_64-linux
     - run: |
-        mv ./result/bin/server ./server.linux-x86_64
-        mv ./result/bin/client ./client.linux-x86_64
+        cp ./result/bin/server ./server.linux-x86_64
+        cp ./result/bin/client ./client.linux-x86_64
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
