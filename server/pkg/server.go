@@ -77,8 +77,58 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 		return nil, fmt.Errorf("image failed to validate: %s", err)
 	}
 
+	stride := 3 // optimistic
+	if !img.Color {
+		stride = 1
+	}
+
+	var neighbors [][2]int = [][2]int{
+		{-1 * stride, 0},           // bottom
+		{1 * stride, 0},            // top
+		{0, -1 * stride},           // left
+		{0, 1 * stride},            // right
+		{-1 * stride, -1 * stride}, // bottom left
+		{1 * stride, 1 * stride},   // top right
+		{-1 * stride, 1 * stride},  // top left
+		{1 * stride, -1 * stride},  // bottom right
+	}
+
+	for i := 0; i < len(img.Data); i += 1 {
+		row := i / int(img.Width)
+		col := i % int(img.Width)
+		acc := img.Data[i]
+		var cnt int
+		for _, n := range neighbors {
+			ro := n[0]                                // row offset
+			co := n[1]                                // col offset
+			j := (row-ro)*int(img.Width) + (col + co) // WARNING: cast could break on extremely large widths
+			if j < 0 || j > len(img.Data) {
+				continue
+			}
+			cnt += 1
+			acc += img.Data[j]
+		}
+		img.Data[i] = byte(int(acc) / cnt) // mean
+	}
+
 	return img, nil
 }
+
+// var calculateAverage = function(matrix, i, j) {
+//     let neighbors = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]];
+//     let sum = matrix[i][j];
+//     let count = 1;
+
+//     for (let [x, y] of neighbors) {
+//         let row = i + x;
+//         let col = j + y;
+//         if (row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length) {
+//             sum += matrix[row][col];
+//             count++;
+//         }
+//     }
+//     return Math.floor(sum / count);
+// }
 
 func validateImage(img *pb.NLImage) error {
 	h := int(img.Height) // WARNING: int32 -> int; should be fine for most systems
