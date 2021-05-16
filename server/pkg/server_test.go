@@ -70,12 +70,12 @@ func TestRotateImage(t *testing.T) {
 		Height: 3,
 	}
 
-	// threeByThreeColor := &pb.NLImage{
-	// 	Color:  true,
-	// 	Data:   []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26},
-	// 	Width:  3,
-	// 	Height: 3,
-	// }
+	threeByThreeColor := &pb.NLImage{
+		Color:  true,
+		Data:   []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26},
+		Width:  3,
+		Height: 3,
+	}
 
 	tt := []struct {
 		name         string
@@ -104,6 +104,26 @@ func TestRotateImage(t *testing.T) {
 			false,
 			"",
 		},
+		{
+			"180 degree rotation - 3x3 color",
+			&pb.NLImageRotateRequest{
+				Rotation: pb.NLImageRotateRequest_ONE_EIGHTY_DEG,
+				Image:    threeByThreeColor,
+			},
+			[]byte{24, 25, 26, 21, 22, 23, 18, 19, 20, 15, 16, 17, 12, 13, 14, 9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2},
+			false,
+			"",
+		},
+		{
+			"270 degree ccw rotation - 3x3 color",
+			&pb.NLImageRotateRequest{
+				Rotation: pb.NLImageRotateRequest_TWO_SEVENTY_DEG,
+				Image:    threeByThreeColor,
+			},
+			[]byte{18, 19, 20, 9, 10, 11, 0, 1, 2, 21, 22, 23, 12, 13, 14, 3, 4, 5, 24, 25, 26, 15, 16, 17, 6, 7, 8},
+			false,
+			"",
+		},
 	}
 
 	for _, tst := range tt {
@@ -125,6 +145,8 @@ func TestRotateImage(t *testing.T) {
 					t.Fatalf("failed to encounter an error when the following was expected: %s", tst.errSubstring)
 				}
 			}
+
+			t.Logf("%v", resp.Data)
 
 			for i, v := range tst.expBytes {
 				t.Logf("got: %d - exp: %d", resp.Data[i], tst.expBytes[i])
