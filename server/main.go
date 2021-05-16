@@ -19,9 +19,9 @@ func main() {
 		host  string
 		debug bool
 	)
-	flag.StringVar(&port, "port", "2222", "server listening port (default: 2222)")
-	flag.StringVar(&host, "host", "localhost", "default interface on which to listen (default: localhost)")
-	flag.BoolVar(&debug, "debug", true, "debug mode (logs some runtime behavior)")
+	flag.StringVar(&port, "port", "2222", "server listening port")
+	flag.StringVar(&host, "host", "localhost", "default interface on which to listen")
+	flag.BoolVar(&debug, "debug", false, "debug mode (logs some runtime behavior)")
 	flag.Parse()
 
 	if v, err := strconv.Atoi(port); err != nil || v < 0 || v > 1<<16 {
@@ -42,6 +42,7 @@ func main() {
 	pb.RegisterNLImageServiceServer(s, &server.Server{
 		Debug: debug,
 	})
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

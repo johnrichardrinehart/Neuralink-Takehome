@@ -28,13 +28,12 @@ func main() {
 		rotate string
 		mean   bool
 	)
-	flag.StringVar(&port, "port", "2222", "port of server (default: 2222)")
-	flag.StringVar(&host, "host", "localhost", "server host (default: localhost)")
-	flag.StringVar(&input, "input", "in.jpg", "path to the input file (default: in.jpg)")
-	flag.StringVar(&output, "output", "out.jpg", "path to the output file (default: out.jpg)")
-	flag.StringVar(&rotate, "rotate", "NONE", "counterclockwise rotation angle: NONE, NINETY_DEG, ONE_EIGHTY_DEG, TWO_SEVENTY_DEG (default: NONE)")
+	flag.StringVar(&port, "port", "2222", "port of server")
+	flag.StringVar(&host, "host", "localhost", "server host")
+	flag.StringVar(&input, "input", "in.jpg", "path to the input file")
+	flag.StringVar(&output, "output", "out.jpg", "path to the output file")
+	flag.StringVar(&rotate, "rotate", "NONE", "counterclockwise rotation angle: NONE, NINETY_DEG, ONE_EIGHTY_DEG, TWO_SEVENTY_DEG")
 	flag.BoolVar(&mean, "mean", false, "boolean option to apply mean filter to image")
-	// flag.BoolVar(&debug, "debug", true, "debug mode (logs some runtime behavior)")
 	flag.Parse()
 
 	if v, err := strconv.Atoi(port); err != nil || v < 0 || v > 1<<16 {
