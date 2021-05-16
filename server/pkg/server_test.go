@@ -146,10 +146,7 @@ func TestRotateImage(t *testing.T) {
 				}
 			}
 
-			t.Logf("%v", resp.Data)
-
 			for i, v := range tst.expBytes {
-				t.Logf("got: %d - exp: %d", resp.Data[i], tst.expBytes[i])
 				if v != resp.Data[i] {
 					t.Fatal("failed to rotate properly")
 				}

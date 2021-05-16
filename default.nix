@@ -8,7 +8,6 @@ pkgs.buildGoModule rec {
 
   src = ./.;
 
-
   meta = with lib; {
     description = "Neuralink Takehome project";
     homepage = https://github.com/johnrichardrinehart/Neuralink-Takehome;
