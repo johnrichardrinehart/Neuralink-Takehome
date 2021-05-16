@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"image"
@@ -26,12 +25,33 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 		log.Printf("received request to rotate an image: %v degrees", 90*req.Rotation)
 	}
 
-	rdr := bytes.NewBuffer(req.Image.Data)
-	img, _, err := image.Decode(rdr)
-
-	if err != nil {
-		return nil, errors.New("failed to decode the image - invalid format")
+	h := int(req.Image.Height) // WARNING: int32 -> int; should be fine for most systems
+	w := int(req.Image.Width)  // WARNING: int32 -> int; should be fine for most systems
+	c := req.Image.Color
+	if (c && len(req.Image.Data) != 3*h*w) || len(req.Image.Data) != h*w {
+		return nil, errors.New("invalid data length - should be a 3x or 1x multiple of height*width")
 	}
+
+	// coerce the input image into RGBa format to re-use stdlib
+	var imga []byte
+	if !c {
+		imga = make([]byte, 2*h*w)
+		for i, v := range req.Image.Data {
+			imga[i] = v // optimistic
+			imga[i+1] = 1 << 2
+		}
+	} else {
+		imga = make([]byte, 4*h*w/3)
+		for i, v := range req.Image.Data {
+			imga[i] = v // optimistic
+			if i%4 == 0 {
+				imga[i] = 1 << 3
+			}
+		}
+	}
+
+	img := image.NewRGBA(image.Rect(0, 0, int(req.Image.Width), int(req.Image.Height)))
+	img.Pix = imga
 
 	if req.Rotation == 0 {
 		return req.Image, nil
