@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
 	"log"
 	"math"
 
 	"github.com/BurntSushi/graphics-go/graphics"
 	pb "github.com/johnrichardrinehart/Neuralink-Takehome/proto"
+	"github.com/pixiv/go-libjpeg/rgb"
 )
 
 // server is used to implement image.NLImageServiceServer
@@ -18,54 +20,68 @@ type Server struct {
 	Debug bool
 }
 
+type rgbDraw struct {
+	*rgb.Image
+}
+
+func (d *rgbDraw) Set(x, y int, c color.Color) {
+	w := d.Rect.Max.X
+	i := y*w + x*3
+	r, g, b, _ := c.RGBA()
+	var el byte
+	switch x % 3 {
+	case 0:
+		el = byte(r)
+	case 1:
+		el = byte(g)
+	case 2:
+		el = byte(b)
+	}
+	d.Pix[i] = el
+}
+
 // RotateImage accepts a request to rotate an image and, if it's of a valid type (PNG/JPG/GIF)
 // rotates it by the requested angle and returns it
 // Failure to decode will return an error
 func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (*pb.NLImage, error) {
-	if s.Debug {
-		log.Printf("received request to rotate an image: %v degrees", 90*req.Rotation)
-	}
-
 	h := int(req.Image.Height) // WARNING: int32 -> int; should be fine for most systems
 	w := int(req.Image.Width)  // WARNING: int32 -> int; should be fine for most systems
 	c := req.Image.Color
+
+	if s.Debug {
+		log.Printf("received request to rotate a %dx%d image: %v degrees", h, w, 90*req.Rotation)
+	}
 
 	if err := validateImage(req.Image); err != nil {
 		return nil, fmt.Errorf("image failed to validate: %s", err)
 	}
 
-	// coerce the input image into RGBa format to re-use stdlib
-	var imga []byte
-
-	if !c {
-		imga = make([]byte, 2*h*w)
-		for i, v := range req.Image.Data {
-			imga[i] = v // optimistic
-			imga[i+1] = 1 << 2
-		}
-	} else {
-		imga = make([]byte, 4*h*w/3)
-		for i, v := range req.Image.Data {
-			imga[i] = v // optimistic
-			if i%4 == 0 {
-				imga[i] = 1 << 3
-			}
-		}
-	}
-
-	img := image.NewRGBA(image.Rect(0, 0, int(req.Image.Width), int(req.Image.Height)))
-	img.Pix = imga
-
 	if req.Rotation == 0 {
 		return req.Image, nil
 	}
 
-	dst := image.NewRGBA(image.Rect(0, 0, int(req.Image.Width), int(req.Image.Height)))
-	graphics.Rotate(dst, img, &graphics.RotateOptions{Angle: (math.Pi / 2) * float64(req.Rotation)})
+	var src image.Image
+	box := image.Rect(0, 0, w, h)
+	if !c {
+		img := image.NewGray(box)
+		dst := image.NewGray(box)
+		img.Pix = req.Image.Data
+		src = img
 
-	req.Image.Data = dst.Pix
+		graphics.Rotate(dst, src, &graphics.RotateOptions{Angle: -1 * (math.Pi / 2) * float64(req.Rotation)})
+		req.Image.Data = dst.Pix
+		return req.Image, nil
+	} else {
+		img := rgb.NewImage(box)
+		dst := &rgbDraw{rgb.NewImage(box)}
+		img.Pix = req.Image.Data
+		src = rgb.NewImage(box)
 
-	return req.Image, nil
+		graphics.Rotate(dst, src, &graphics.RotateOptions{Angle: -1 * (math.Pi / 2) * float64(req.Rotation)})
+		req.Image.Data = dst.Pix
+		return req.Image, nil
+	}
+
 }
 
 func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, error) {

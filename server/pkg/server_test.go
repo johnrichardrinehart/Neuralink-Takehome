@@ -100,7 +100,7 @@ func TestRotateImage(t *testing.T) {
 				Rotation: pb.NLImageRotateRequest_NINETY_DEG,
 				Image:    threeByThreeGrayscale,
 			},
-			[]byte{2, 5, 8, 1, 4, 7, 0, 3, 8},
+			[]byte{2, 5, 8, 1, 4, 7, 0, 3, 6},
 			false,
 			"",
 		},
@@ -127,7 +127,7 @@ func TestRotateImage(t *testing.T) {
 			}
 
 			for i, v := range tst.expBytes {
-				t.Logf("got: %d - exp: %d", v, tst.expBytes[i])
+				t.Logf("got: %d - exp: %d", resp.Data[i], tst.expBytes[i])
 				if v != resp.Data[i] {
 					t.Fatal("failed to rotate properly")
 				}

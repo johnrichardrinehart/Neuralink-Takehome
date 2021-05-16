@@ -2,7 +2,7 @@
 { pkgs ? import <nixpkgs> { }, lib ? import <nixpkgs/lib> }:
 
 pkgs.buildGoModule rec {
-  vendorSha256 = "qhGbbkxbefpDt5bFeMtLPvLfdeEG8R6kuzy2bImqhi8=";
+  vendorSha256 = "d7hDDUl3MGiZRw7oOqBAIIdCIod9IRm4i+EhQMnKjm8=";
   pname = "Neuralink-Takehome";
   version = "0.3.4";
 
