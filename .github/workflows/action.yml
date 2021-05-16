@@ -22,3 +22,5 @@ jobs:
         files: |
           ./result/bin/server
           ./result/bin/client
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
