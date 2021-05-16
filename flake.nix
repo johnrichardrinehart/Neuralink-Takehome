@@ -5,14 +5,13 @@
   };
 
   outputs = { self, nixpkgs, gomod2nix, ... }:
-    #    let pkgs = import inputs.nixpkgs;
     let
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
-    lib = nixpkgs.lib;
+      pkgs = import nixpkgs { system = "x86_64-linux"; };
+      lib = nixpkgs.lib;
     in
     {
       defaultPackage.x86_64-linux = with nixpkgs.legacyPackages.x86_64-linux;
-        (import ./.) { inherit pkgs lib;};
+        (import ./.) { inherit pkgs lib; };
 
       devShell.x86_64-linux = (import ./shell.nix) { inherit pkgs; };
 
