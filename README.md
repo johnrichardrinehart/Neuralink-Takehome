@@ -4,17 +4,18 @@
 This repository supports a number of build paths for different use cases. They
 will be described using the following language and are ordered by most pure to
 least pure: range from most pure to least pure using the following terms:
-1. `nix-flake` (or the [`nix` "flake"](https://nixos.wiki/wiki/Flakes) build
+1. `nix-flakes` (or the [`nix` "flakes"](https://nixos.wiki/wiki/Flakes) build
    mode)
 1. `nix-legacy` (or the `nix` legacy build mode)
-1. `docker`(`podman` is used to avoid the need to use `root` during the build
-   process)
-1. `host`
+1. `docker`([`podman`](https://podman.io/) is used to avoid the need to use
+   `root` during the build process)
+1. `host` (basic `bash` shell script build)
 
 The `./setup.sh` and `./build.sh` scripts support all 4 modes of building based
 on a fresh Ubuntu 18.04 instance (tested on AWS AMI `ami-090717c950a5c34d3`).
 
 ### Quickstart
+
 I encourage you to read the description of all `setup` and `build` paths that
 can be taken, below. But, if you're in a rush you can simply perform the
 following steps:
@@ -34,61 +35,80 @@ from the root of the repository and `nl-client` (the client) and `nl-server`
 
 You can use the `--help` or `-h` flag for CLI documentation.
 
-### `nix flake`
-### Why?
-`nix` builds rely on the [`nix` package
-manager](https://nixos.org/explore.html). The `nix build` command relies on a
+### Method 1: `nix flakes`
+
+#### Why?
+
+The name `nix` is used to describe a number of tools that are used with the aim
+of developing a fully-reproducible build system with no build-time I/O (network
+fetching or file copying). The build process relies on the [`nix` package
+manager](https://nixos.org/explore.html). The `nix build` command uses a
 `flake.nix` in the root of the repository which, along with a `flake.lock` file
 (if present) fetches the proper versions (hashed) of all dependencies and builds
 them in an environment with minimal path and no I/O (no file copying or network
-access).
+access). The purity of the build provides improved security and reliability to
+the build process.
 
 All dependencies are resolved using the `nix` store  (`/nix/store`) so,
 depending on the software being built, it can easily reference multiple versions
 of a single dependency, since all dependencies are hashed based on their
 contents.
 
-In the future, `nix` plans to have a content-addressable store hosted on `IPFS`
-so no central repository will supply the necessary dependencies.
-
-The `nix build` command implicitly uses the `flake.nix` file in the root of the
-repository, similar to how a plain `Dockerfile` would be implicitly picked up by
-a run of `docker build`/`podman build` from the working directory.
+In the future, `nix` plans to have a content-addressable store hosted on
+[`IPFS`](https://ipfs.io/) so no central repository will supply the necessary
+dependencies.
 
 #### How?
-    ./setup.sh nix-flake # ensure the user has `sudo` permissions (`wheel` group)
-    ./build.sh nix-flake
+
+    ./setup.sh nix-flakes # ensure the user has `sudo` permissions (`wheel` group)
+    ./build.sh nix-flakes
+
+The above build script invocation executes `nix build` which implicitly uses the
+`flake.nix` file in the root of the repository, similar to how a plain
+`Dockerfile` would be implicitly picked up by a run of `docker build` from the
+working directory.
 
 #### Where?
+
 The binaries should be soft-linked to `./result/bin/{server,client}`
 
-### `nix-legacy`
-#### Why?
-`nix-legacy` uses the `default.nix` in the root of the repository. Builds are
-not cached in `legacy` `nix` and builds are not fully reproducible since the
-dependency hashes are not referenced at build-time (`flake.lock`).
+### Method 2: `nix-legacy`
 
-However, the build process is more reproducible than `Docker` (and definitely
-`host`) since every dependency version is pinned to a particular commit of the
-`github.com/NixOS/nixpkgs` repository.
+#### Why?
+This build mode is similar to the above `nix` flakes mode. However, the build is
+not as reproducible since a lockfile is not used to ensure the exact
+dependencies are fetched. However, the build process tends to be more
+reproducible than `Docker` (and definitely `host`) since every dependency
+version is pinned to a particular commit of the `github.com/NixOS/nixpkgs`
+repository.
 
 #### How?
+
     ./setup.sh nix-legacy # ensure the user has `sudo` permissions (`wheel` group)
     ./build.sh nix-legacy
 
+The above build script invocation executes `nix build` which implicitly uses the
+`default.nix` file in the root of the repository, similar to how a plain
+`Dockerfile` would be implicitly picked up by a run of `docker build` from the
+working directory.
+
 #### Where?
 The binaries should be soft-linked to `./result/bin/{server,client}`
 
-### `docker` (warning: slow build time)
+### Method 3: `docker` (warning: slow build time)
+
 The `docker` setup and build path actually uses `podman` instead of `docker`,
-since it doesn't require root permissions to create and manage images or run and
-control containers.
+since `podman` doesn't require root permissions to create and manage images or
+run and control containers. But, everyone knows "docker", so that is its name,
+here.
 
 #### How?
+
     sudo ./setup.sh docker # sudo is needed to install `podman` into the system directories
     ./build.sh docker # IMPORTANT: no sudo
 
 #### Where?
+
 You can check if the images were built successfully by `podman image ls | grep
 -e "nl-"`. You should see two images: `nl-client` and `nl-server`.
 
@@ -99,7 +119,8 @@ network, as follows:
     podman run -d --network=host nl-server --debug # running in the background
     podman run --network=host nl-client --help
 
-### `host`
+### Method 4: `host`
+
 `host` uses the standard `apt` package manager and build tools for the `Go`
 programming language to build the `server` and `client` binaries. Dependencies
 are stored in `go.mod` and `go.sum`.
@@ -110,10 +131,12 @@ But, nothing prevents someone from changing the compiler version in `setup.sh`.
 This could break the build.
 
 #### How?
-    sudo ./setup.sh [host] # `host` is optional since this is the default setup type
-    ./build.sh [host]
+
+    sudo ./setup.sh [host] # `host` is optional since this is the default mode
+    sudo ./build.sh [host]
 
 #### Where?
+
 The binaries should be located at `./nl-{client,server}` (soft-linked from
 `/tmp`)
 
@@ -160,7 +183,7 @@ If I had more time I would have:
 1. Added color detection (if most images are grayscale then this feature is a
    big network I/O saver)
 1. ... and more, but that's a good start to a list of unordered things I would
-   have done if this project was mission-critical
+   have done if I had had more time
 
 ## Design Considerations
 ### Logging
@@ -196,6 +219,6 @@ The component of the GitHub Action that runs the `nix` flake executes all tests
 and compiles the code. So, any issue with my tests or in being able to compile
 will be visible as a failure to build in the GitHub Actions history.
 
-## Conclusion
+## Afterword
 Thanks for taking the time to consider my application and review my code. I hope
 it was enjoyable for you and I hope to hear from you soon!
