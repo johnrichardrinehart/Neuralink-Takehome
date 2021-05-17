@@ -9,7 +9,15 @@ range from most pure to least pure using the following terms:
 1. `docker`(`podman` is used to avoid the need to use `root` during the build process)
 1. `host`
 
-The `./setup.sh` and `./build.sh` scripts support all 4 modes of building based on a fresh Ubuntu 18.04 instance.
+The `./setup.sh` and `./build.sh` scripts support all 4 modes of building based on a fresh Ubuntu 18.04 instance (tested on AWS AMI `ami-090717c950a5c34d3`).
+
+I encourage you to read the description of all `setup` and `build` paths that can be taken, below. But, if you're in a rush you can simply run
+    
+    sudo ./setup.sh && sudo ./build.sh
+
+from the root of the repository and `nl-client` (the client) and `nl-server` (the server) should be visible in the working directory.
+
+You can use the `--help` or `-h` flag for CLI documentation.
 
 ### `nix flake`
 ### Why?
