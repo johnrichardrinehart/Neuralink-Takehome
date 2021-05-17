@@ -4,9 +4,12 @@
 function host {
 	export GOLOC=/usr/local/go
 	export PATH=$GOLOC/bin:$PATH
-	go build -o /etc/nl-client ./client
-	go build -o /etc/nl-server ./server
-	chown $(logname): /etc/nl-{client,server}
+	go build -o /tmp/nl-client ./client
+	go build -o /tmp/nl-server ./server
+	chown $(logname): /tmp/nl-{client,server}
+	ln -s /tmp/nl-client ./client
+	ln -s /tmp/nl-server ./server
+	chown $(logname): ./nl-client ./nl-server
 }
 
 function docker {
