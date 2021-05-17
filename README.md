@@ -68,7 +68,7 @@ Builds are somewhat reproducible since the `go` compiler and the project depende
     ./build.sh [host]
 
 #### Where?
-The binaries should be located at `/etc/nl-{client,server}`
+The binaries should be located at `./nl-{client,server}` (soft-linked from `/tmp`)
 
 ## Conclusion
 If I had more time I would have:

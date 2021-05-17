@@ -7,8 +7,8 @@ function host {
 	go build -o /tmp/nl-client ./client
 	go build -o /tmp/nl-server ./server
 	chown $(logname): /tmp/nl-{client,server}
-	ln -s /tmp/nl-client ./client
-	ln -s /tmp/nl-server ./server
+	ln -s /tmp/nl-client ./nl-client
+	ln -s /tmp/nl-server ./nl-server
 	chown $(logname): ./nl-client ./nl-server
 }
 
