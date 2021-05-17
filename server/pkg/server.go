@@ -45,6 +45,13 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 	w := int(req.Image.Width)  // WARNING: int32 -> int; should be fine for most systems
 	c := req.Image.Color
 
+	resp := pb.NLImage{
+		Color:  req.Image.Color,
+		Width:  req.Image.Width,
+		Height: req.Image.Height,
+		Data:   nil,
+	}
+
 	if s.Debug {
 		log.Printf("received request to rotate a %dx%d image: %v degrees", h, w, 90*req.Rotation)
 	}
@@ -53,33 +60,44 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 		return nil, fmt.Errorf("image failed to validate: %s", err)
 	}
 
-	if req.Rotation == 0 {
+	if req.Rotation == 0 || len(req.Image.Data) == 0 {
 		return req.Image, nil
 	}
 
-	box := image.Rect(0, 0, w, h)
+	srcbox := image.Rect(0, 0, w, h)
+	dstbox := image.Rect(0, 0, w, h)
+	// height <=> width for 90 and 270
+	if req.Rotation%2 == 1 {
+		dstbox = image.Rect(0, 0, h, w)
+		resp.Width = req.Image.Height
+		resp.Height = req.Image.Width
+	}
 	if !c {
-		src := image.NewGray(box)
+		src := image.NewGray(srcbox)
 		src.Pix = req.Image.Data
-		dst := image.NewGray(box)
+		dst := image.NewGray(dstbox)
 
 		graphics.Rotate(dst, src, &graphics.RotateOptions{Angle: -1 * (math.Pi / 2) * float64(req.Rotation)})
 
-		req.Image.Data = dst.Pix
+		resp.Data = dst.Pix
 	} else {
-		src := rgb.NewImage(box)
+		src := rgb.NewImage(srcbox)
 		src.Pix = req.Image.Data
-		dst := &rgbDraw{rgb.NewImage(box)}
+		dst := &rgbDraw{rgb.NewImage(dstbox)}
 
 		graphics.Rotate(dst, src, &graphics.RotateOptions{Angle: -1 * (math.Pi / 2) * float64(req.Rotation)})
 
-		req.Image.Data = dst.Pix
+		resp.Data = dst.Pix
 	}
 
-	return req.Image, nil
+	return &resp, nil
 }
 
 func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, error) {
+	if len(img.Data) == 0 {
+		return img, nil
+	}
+
 	w := int(img.Width)
 	h := int(img.Height)
 

@@ -128,7 +128,7 @@ func main() {
 		log.Fatalf("failed to create output file %s: %s", output, err)
 	}
 
-	m := rgb.NewImage(image.Rect(0, 0, w, h))
+	m := rgb.NewImage(image.Rect(0, 0, int(resp.Width), int(resp.Height)))
 	m.Pix = resp.Data
 
 	switch ft {
