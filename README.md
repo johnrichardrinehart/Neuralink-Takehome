@@ -69,3 +69,37 @@ Builds are somewhat reproducible since the `go` compiler and the project depende
 
 #### Where?
 The binaries should be located at `/etc/nl-{client,server}`
+
+## Conclusion
+If I had more time I would have:
+1. Written this in `rust` (still learning) - there are some great [image codec libaries for `rust`](https://github.com/image-rs/image) and generally this language produces fast code with no GC overhead like `go`.
+1. Used the C FFI for `go` to link into a highly-performant and stress-tested image codec library (like [libjpeg](https://github.com/libjpeg-turbo/libjpeg-turbo))
+1. Processed each request from clients in separate goroutines so multiple images could be processed in parallel
+1. Set up a (in-memory or external) queue so the `server` could process requests asynchronously
+1. Added a `ID` field to the responses so `client`'s could request the status of their message processing
+1. Added `prometheus` metrics so we could hook into `grafana` if we wanted
+1. Done some `pprof` analysis to see where my code was spending a lot of time or consuming excessive memory
+1. Done more extensive tests with extremely large images (hundreds of MiB) to demonstrate a solution that doesn't require the entire image to be in memory during processing
+1. Cleaned up some of the loops so we could take advantage of a lot of repeated operation (the mean filter "stencil" added and divided a lot of the same numbers)
+1. Implement structured logging so that this could be more production ready
+1. Develop an ASIC (prototyping on an FPGA) that would perform these operations in hardware to save on energy and time (if the scale of the problem demanded it)
+1. Flush runtime statistics and logs to a database so we would have more visibility into the application's behavior over long periods of time
+1. Add a health endpoint (and embed some various system statistics in the health endpoint JSON response) so we could trigger autoscaling logic or Ops alerts
+1. Added more unit tests to cover expected failure cases and more complex scenarios (95.7% of the `server` package is tested, currently)
+1. Added an authentication layer so that only authorized people could perform services within their scope
+1. ... and more, but that's a good start to a list of unordered things I would have done if this project was mission-critical
+
+## Design Considerations
+### Logging
+I considered adding more detailed log information, but it ultimately wasn't helpful in diagnosing 
+any problems. I would have added more logging if I needed more visibility into the behavior of the application at runtime.
+
+### Packaging
+I implemented 4 different packaging systems (the above `setup` and `build` instructions). I chose to
+do this because I think in a corporate/production environment reproducibility and environmental consistency in building is paramount. This is one reason you've seen monolith declaritive projects like `k8s` and `bazel` take center stage. However, `nix` is an ops-deployment system (`NixOps`) a day-to-day operating system (`NixOS`) a package manager (`nix`) and a functional programming language (`nix-lang`) that deserves more attention from the broader software community because of the problems it solves, particularly in its ability to declaratively manage dependencies, offer fully-reproducible builds, flexibly construct an entire OS using its semantics (so flexible enough for any software project), and for its ability to manage multiple version of the same dependency (which can be useful for build environments of large software systems whose components parts may develop/mature at different rates).
+
+## GitHub Actions
+I also implemented a build system that would make release binaries available to the Neuralink team in case there were any problem building my software. It triggers builds on each push (done with `nix` flakes since it's the most reproducible) and pushes binary releases on each tag event. This is a simple, but nice thing to have and can easily be plugged into AWS ECS/similar to automate deployments. The `docker` build of this repo can similiarly be pushed to ECR/similar if the deployment environment is container-based. Neat :).
+
+## Conclusion
+Thanks for taking the time to consider my application and review my code. I hope it was enjoyable for you and I hope to hear from you soon!
