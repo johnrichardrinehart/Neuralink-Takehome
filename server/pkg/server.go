@@ -25,6 +25,7 @@ type rgbDraw struct {
 	*rgb.Image
 }
 
+// Set implements the Drawer interface and sets the pixel at (x,y) to color c
 func (d *rgbDraw) Set(x, y int, c color.Color) {
 	w := d.Rect.Max.X // width
 
@@ -93,6 +94,7 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 	return &resp, nil
 }
 
+// MeanFilter computes the arithmetic mean of the nearest-neighbor pixels for each pixel in the source image
 func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, error) {
 	if len(img.Data) == 0 {
 		return img, nil
@@ -180,6 +182,7 @@ func XYToI(x, y, stride, colorOffset, width int) (i int) {
 	return
 }
 
+// validateImage checks to see if the data contanied in a pb.NLImage makes sense
 func validateImage(img *pb.NLImage) error {
 	h := int(img.Height) // WARNING: int32 -> int; should be fine for most systems
 	w := int(img.Width)  // WARNING: int32 -> int; should be fine for most systems

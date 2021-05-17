@@ -101,12 +101,14 @@ If I had more time I would have:
 1. Done some `pprof` analysis to see where my code was spending a lot of time or consuming excessive memory
 1. Done more extensive tests with extremely large images (hundreds of MiB) to demonstrate a solution that doesn't require the entire image to be in memory during processing
 1. Cleaned up some of the loops so we could take advantage of a lot of repeated operation (the mean filter "stencil" added and divided a lot of the same numbers)
-1. Implement structured logging so that this could be more production ready
-1. Develop an ASIC (prototyping on an FPGA) that would perform these operations in hardware to save on energy and time (if the scale of the problem demanded it)
-1. Flush runtime statistics and logs to a database so we would have more visibility into the application's behavior over long periods of time
-1. Add a health endpoint (and embed some various system statistics in the health endpoint JSON response) so we could trigger autoscaling logic or Ops alerts
+1. Implemented structured logging so that this could be more production ready
+1. Developed an ASIC (prototyping on an FPGA) that would perform these operations in hardware to save on energy and time (if the scale of the problem demanded it)
+1. Flushed runtime statistics and logs to a database so we would have more visibility into the application's behavior over long periods of time
+1. Added a health endpoint (and embed some various system statistics in the health endpoint JSON response) so we could trigger autoscaling logic or Ops alerts
 1. Added more unit tests to cover expected failure cases and more complex scenarios (95.7% of the `server` package is tested, currently)
 1. Added an authentication layer so that only authorized people could perform services within their scope
+1. Added retry and customizable timeout behavior for the client
+1. Added color detection (if most images are grayscale then this feature is a big network I/O saver)
 1. ... and more, but that's a good start to a list of unordered things I would have done if this project was mission-critical
 
 ## Design Considerations

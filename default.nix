@@ -3,7 +3,7 @@
 pkgs.buildGoModule rec {
   vendorSha256 = "zXRytszXa0NFIYnN3PDZq2tSiLJbfB+LL+4OAYtcQJ4=";
   pname = "Neuralink-Takehome";
-  version = "1.0.6";
+  version = "1.0.7";
 
   nativeBuildInputs = with pkgs.buildPackages; [ go protobuf protoc-gen-go protoc-gen-go-grpc ];
 

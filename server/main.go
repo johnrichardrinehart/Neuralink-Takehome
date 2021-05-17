@@ -61,6 +61,7 @@ func main() {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
+
 	<-done
 	s.GracefulStop()
 	if debug {

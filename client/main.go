@@ -50,6 +50,7 @@ func main() {
 
 	defer conn.Close()
 
+	// open and mangle the input image into a pb.NLImage type
 	fin, err := os.Open(input)
 	if err != nil {
 		log.Fatalf("failed to open file %s: %s", input, err)
@@ -83,8 +84,10 @@ func main() {
 		Height: int32(h),
 	}
 
+	// new gRPC client
 	c := pb.NewNLImageServiceClient(conn)
 
+	// TODO: make this configurable with retry
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if mean {
