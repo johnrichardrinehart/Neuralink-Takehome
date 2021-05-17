@@ -19,7 +19,7 @@ I encourage you to read the description of all `setup` and `build` paths that ca
 
         git clone https://github.com/johnrichardrinehart/Neuralink-Takehome nlth
         cd nlth
-        sudo sh -c "./setup.sh && sudo ./build.sh" # this executes the `host` setup and build, described below
+        sudo sh -c "./setup.sh && ./build.sh" # this executes the `host` setup and build, described below
 
 from the root of the repository and `nl-client` (the client) and `nl-server` (the server) should be visible in the working directory.
 
@@ -32,7 +32,7 @@ in the root of the repository which, along with a `flake.lock` file (if present)
 dependencies and builds them in an environment with minimal path and no I/O (no file copying or network access).
 
 All dependencies are resolved using the `nix` store  (`/nix/store`) so, depending on the software being built, it can easily 
-reference multiple versions of a single dependency, since all depenendencies are hashed based on their contents.
+reference multiple versions of a single dependency, since all dependencies are hashed based on their contents.
 
 In the future, `nix` plans to have a content-addressable store hosted on `IPFS` so no central repository will supply the necessary 
 dependencies.
@@ -70,7 +70,13 @@ The `docker` setup and build path actually uses `podman` instead of `docker`, si
     ./build.sh docker # IMPORTANT: no sudo
 
 #### Where?
-The binaries should be located at `/etc/nl-{client,server}`
+You can check if the images were built successfully by `podman image ls | grep -e "nl-"`. You should see
+two images: `nl-client` and `nl-server`.
+
+To run them together they need to be in the same network. This is challenging on Darwin, but easily accomplished on `linux` by binding the containers to the host network, as follows:
+
+    podman run -d --network=host nl-server --debug # running in the background
+    podman run --network=host nl-client --help
 
 ### `host`
 `host` uses the standard `apt` package manager and build tools for the `Go` programming language to build the `server` and `client` binaries. Dependencies are stored in `go.mod` and `go.sum`.
@@ -86,8 +92,8 @@ The binaries should be located at `./nl-{client,server}` (soft-linked from `/tmp
 
 ## Conclusion
 If I had more time I would have:
-1. Written this in `rust` (still learning) - there are some great [image codec libaries for `rust`](https://github.com/image-rs/image) and generally this language produces fast code with no GC overhead like `go`.
-1. Used the C FFI for `go` to link into a highly-performant and stress-tested image codec library (like [libjpeg](https://github.com/libjpeg-turbo/libjpeg-turbo))
+1. Written this in `rust` (still learning) - there are some great [image codec libraries for `rust`](https://github.com/image-rs/image) and generally this language produces fast code with no GC overhead like `go`.
+1. Used the C FFI for `go` to link into a highly-performance and stress-tested image codec library (like [libjpeg](https://github.com/libjpeg-turbo/libjpeg-turbo))
 1. Processed each request from clients in separate goroutines so multiple images could be processed in parallel
 1. Set up a (in-memory or external) queue so the `server` could process requests asynchronously
 1. Added a `ID` field to the responses so `client`'s could request the status of their message processing
@@ -110,10 +116,10 @@ any problems. I would have added more logging if I needed more visibility into t
 
 ### Packaging
 I implemented 4 different packaging systems (the above `setup` and `build` instructions). I chose to
-do this because I think in a corporate/production environment reproducibility and environmental consistency in building is paramount. This is one reason you've seen monolith declaritive projects like `k8s` and `bazel` take center stage. However, `nix` is an ops-deployment system (`NixOps`) a day-to-day operating system (`NixOS`) a package manager (`nix`) and a functional programming language (`nix-lang`) that deserves more attention from the broader software community because of the problems it solves, particularly in its ability to declaratively manage dependencies, offer fully-reproducible builds, flexibly construct an entire OS using its semantics (so flexible enough for any software project), and for its ability to manage multiple version of the same dependency (which can be useful for build environments of large software systems whose components parts may develop/mature at different rates).
+do this because I think in a corporate/production environment reproducibility and environmental consistency in building is paramount. This is one reason you've seen monolith declarative projects like `k8s` and `bazel` take center stage. However, `nix` is an ops-deployment system (`NixOps`) a day-to-day operating system (`NixOS`) a package manager (`nix`) and a functional programming language (`nix-lang`) that deserves more attention from the broader software community because of the problems it solves, particularly in its ability to declaratively manage dependencies, offer fully-reproducible builds, flexibly construct an entire OS using its semantics (so flexible enough for any software project), and for its ability to manage multiple version of the same dependency (which can be useful for build environments of large software systems whose components parts may develop/mature at different rates).
 
 ## GitHub Actions
-I also implemented a build system that would make release binaries available to the Neuralink team in case there were any problem building my software. It triggers builds on each push (done with `nix` flakes since it's the most reproducible) and pushes binary releases on each tag event. This is a simple, but nice thing to have and can easily be plugged into AWS ECS/similar to automate deployments. The `docker` build of this repo can similiarly be pushed to ECR/similar if the deployment environment is container-based. Neat :).
+I also implemented a build system that would make release binaries available to the Neuralink team in case there were any problem building my software. It triggers builds on each push (done with `nix` flakes since it's the most reproducible) and pushes binary releases on each tag event. This is a simple, but nice thing to have and can easily be plugged into AWS ECS/similar to automate deployments. The `docker` build of this repo can similarly be pushed to ECR/similar if the deployment environment is container-based. Neat :).
 
 The component of the GitHub Action that runs the `nix` flake executes all tests and compiles the code. So, any issue with my tests or in being able to compile will be visible as a failure to build in the GitHub Actions history.
 
