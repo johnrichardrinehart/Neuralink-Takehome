@@ -11,9 +11,15 @@ range from most pure to least pure using the following terms:
 
 The `./setup.sh` and `./build.sh` scripts support all 4 modes of building based on a fresh Ubuntu 18.04 instance (tested on AWS AMI `ami-090717c950a5c34d3`).
 
-I encourage you to read the description of all `setup` and `build` paths that can be taken, below. But, if you're in a rush you can simply run
-    
-    sudo ./setup.sh && sudo ./build.sh
+### Quickstart
+I encourage you to read the description of all `setup` and `build` paths that can be taken, below. But, if you're in a rush you can simply perform the following steps:
+
+1. Spin up an `Ubuntu 18.04` instance (I used an AWS `ami-090717c950a5c34d3` image with 40GiB of disk space, the default 8GiB is probably too small for the `docker` build *and* a couple of the other builds and disk space is relatively cheap)
+2. Run the following lines in the shell
+
+        git clone https://github.com/johnrichardrinehart/Neuralink-Takehome nlth
+        cd nlth
+        sudo sh -c "./setup.sh && sudo ./build.sh" # this executes the `host` setup and build, described below
 
 from the root of the repository and `nl-client` (the client) and `nl-server` (the server) should be visible in the working directory.
 
@@ -39,7 +45,7 @@ implicitly picked up by a run of `docker build`/`podman build` from the working 
     ./build.sh nix-flake
 
 #### Where?
-The binaries should be soft-linked to `./result/bin/{server,client}
+The binaries should be soft-linked to `./result/bin/{server,client}`
 
 ### `nix-legacy`
 #### Why?
@@ -54,14 +60,14 @@ a particular commit of the `github.com/NixOS/nixpkgs` repository.
     ./build.sh nix-legacy
 
 #### Where?
-The binaries should be soft-linked to `./result/bin/{server,client}
+The binaries should be soft-linked to `./result/bin/{server,client}`
 
-### `docker`
+### `docker` (warning: slow build time)
 The `docker` setup and build path actually uses `podman` instead of `docker`, since it doesn't require root permissions to create and manage images or run and control containers.
 
 #### How?
     sudo ./setup.sh docker # sudo is needed to install `podman` into the system directories
-    ./build.sh docker # note no sudo
+    ./build.sh docker # IMPORTANT: no sudo
 
 #### Where?
 The binaries should be located at `/etc/nl-{client,server}`
