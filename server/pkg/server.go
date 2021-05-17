@@ -94,7 +94,8 @@ func (s Server) RotateImage(ctx context.Context, req *pb.NLImageRotateRequest) (
 	return &resp, nil
 }
 
-// MeanFilter computes the arithmetic mean of the nearest-neighbor pixels for each pixel in the source image
+// MeanFilter computes the arithmetic mean of the nearest-neighbor pixels for
+// each pixel in the source image
 func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, error) {
 	if len(img.Data) == 0 {
 		return img, nil
@@ -165,9 +166,9 @@ func (s Server) MeanFilter(ctx context.Context, img *pb.NLImage) (*pb.NLImage, e
 	return img, nil
 }
 
-// iToXY takes the index of an element in a row-ordered linear array and outputs the (x,y) coordinate of the pixel
-// within the picture
-// each pixel is assumed to be a stride-dimensional sub-array
+// iToXY takes the index of an element in a row-ordered linear array and outputs
+// the (x,y) coordinate of the pixel within the picture each pixel is assumed to
+// be a stride-dimensional sub-array
 func iToXY(i, stride, width int) (x, y int) {
 	n := i / stride // aggregate by stride length (rgb have the same pixel)
 	x = n % width
@@ -175,8 +176,8 @@ func iToXY(i, stride, width int) (x, y int) {
 	return
 }
 
-// XYtoI converts the (x,y) coordinate of a stride-dimensional pixel and a color "offset"
-// and returns the index in a row-ordered linear array
+// XYtoI converts the (x,y) coordinate of a stride-dimensional pixel and a color
+// "offset" and returns the index in a row-ordered linear array
 func XYToI(x, y, stride, colorOffset, width int) (i int) {
 	i = stride*(x+y*width) + colorOffset
 	return
