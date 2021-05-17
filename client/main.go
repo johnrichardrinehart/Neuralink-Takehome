@@ -57,11 +57,10 @@ func main() {
 
 	img, ft, err := image.Decode(fin)
 	if err != nil {
-		log.Fatalf("failed to decode input file: %s", err)
+		log.Fatalf("failed to decode input file as either JPEG or PNG: %s", err)
 	}
 
-	log.Printf("discovered filetype: %s", ft)
-
+	// TODO: detect if image is colored
 	w := img.Bounds().Dx()
 	h := img.Bounds().Dy()
 	bs := make([]byte, w*h*3)
@@ -70,7 +69,7 @@ func main() {
 			color := img.At(i, j)
 			r, g, b, _ := color.RGBA()
 			n := 3 * (i + j*w)
-
+			// alpha downscale
 			bs[n] = byte(r >> 8)
 			bs[n+1] = byte(g >> 8)
 			bs[n+2] = byte(b >> 8)
