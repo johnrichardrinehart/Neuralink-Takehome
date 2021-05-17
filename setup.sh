@@ -3,7 +3,7 @@
 function host {
 	apt-get update
 	# install protoc
-	apt-get install unzip
+	apt-get install -y unzip
 	export PROTOC_FILENAME="protoc-3.12.1-linux-x86_64.zip"
 	curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v3.12.1/${PROTOC_FILENAME}"
 	unzip $PROTOC_FILENAME -d /usr/local
@@ -25,9 +25,20 @@ function host {
 		./proto/image.proto
 }
 
+function docker {
+	. /etc/os-release
+	echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+	curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
+	apt-get update
+	apt-get -y upgrade
+	apt-get install -y podman
+}
+
 function main {
 	if [[ $1 == "" ]] || [[ $1 == "host" ]] ; then
 		host
+	elif [[ $1 == "docker" ]]; then
+		docker
 	fi
 }
 
