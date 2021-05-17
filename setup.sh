@@ -8,10 +8,10 @@ function host {
 	curl -LO "https://github.com/protocolbuffers/protobuf/releases/download/v3.12.1/${PROTOC_FILENAME}"
 	unzip $PROTOC_FILENAME -d /usr/local
 	rm $PROTOC_FILENAME
-	# install go1.15.2 (apt doesn't support a new-enough version to support Go modules)
-	export GO_FILENAME="go1.15.2.linux-amd64.tar.gz"
+	# install go1.16.4 (apt doesn't support a new-enough version to support Go modules)
+	export GO_FILENAME="go1.16.4.linux-amd64.tar.gz"
 	wget https://dl.google.com/go/$GO_FILENAME
-	tar -xvf go1.15.2.linux-amd64.tar.gz -C /usr/local
+	tar -xvf go1.16.4.linux-amd64.tar.gz -C /usr/local
 	rm $GO_FILENAME
 	export GOBIN=/usr/local/go/bin
 	export PATH=$GOBIN:$PATH
@@ -39,7 +39,10 @@ function main {
 		host
 	elif [[ $1 == "docker" ]]; then
 		docker
+	elif [[ $1 == "nix-legacy" ]]; then
+		curl -L https://nixos.org/nix/install | sh
+	elif [[ $1 == "nix-flakes" ]]; then
+		curl -L https://nixos.org/nix/install | sh
 	fi
 }
-
 main $1

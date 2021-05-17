@@ -22,6 +22,12 @@ function main {
 		host
 	elif [[ $1 == "docker" ]]; then
 		docker
+	elif [[ $1 == "nix-legacy" ]]; then
+		source $HOME/.nix-profile/etc/profile.d/nix.sh
+		nix-build
+	elif [[ $1 == "nix-flakes" ]]; then
+		source $HOME/.nix-profile/etc/profile.d/nix.sh
+		nix build
 	fi
 }
 
