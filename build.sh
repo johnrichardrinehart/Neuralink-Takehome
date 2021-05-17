@@ -6,6 +6,7 @@ function host {
 	export PATH=$GOLOC/bin:$PATH
 	go build -o /etc/nl-client ./client
 	go build -o /etc/nl-server ./server
+	chown $(logname): /etc/nl-{client,server}
 }
 
 function docker {
