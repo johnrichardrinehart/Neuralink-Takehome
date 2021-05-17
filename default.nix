@@ -1,9 +1,8 @@
-# from https://github.com/tweag/gomod2nix
 { pkgs ? import <nixpkgs> { }, lib ? import <nixpkgs/lib> }:
 pkgs.buildGoModule rec {
-  vendorSha256 = "zXRytszXa0NFIYnN3PDZq2tSiLJbfB+LL+4OAYtcQJ4=";
+  vendorSha256 = "sWPx+S7DL50kIqYGW9+CnHXQhuM5fT5qogsICDyjF6Q=";
   pname = "Neuralink-Takehome";
-  version = "1.0.7";
+  version = "1.0.8";
 
   nativeBuildInputs = with pkgs.buildPackages; [ go protobuf protoc-gen-go protoc-gen-go-grpc ];
 
@@ -21,6 +20,6 @@ pkgs.buildGoModule rec {
     homepage = https://github.com/johnrichardrinehart/Neuralink-Takehome;
     license = licenses.mit;
     maintainers = with maintainers; [ johnrichardrinehart ];
-    platforms = platforms.linux ++ platforms.darwin;
+    platforms = platforms.linux;
   };
 }
