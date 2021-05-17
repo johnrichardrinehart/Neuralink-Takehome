@@ -16,7 +16,7 @@ function host {
 	export GOBIN=/usr/local/go/bin
 	export PATH=$GOBIN:$PATH
 	export GO_FILENAME="go1.16.4.linux-amd64.tar.gz"
-	wget -o ./$GO_FILENAME https://dl.google.com/go/$GO_FILENAME
+	curl -o $GO_FILENAME https://dl.google.com/go/$GO_FILENAME
 	tar -xvf go1.16.4.linux-amd64.tar.gz -C /usr/local
 	# clean up
 	rm $GO_FILENAME
