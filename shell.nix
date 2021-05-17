@@ -32,6 +32,14 @@ let
     mkdir -p $out/bin
     ln -s ${pkgs.podman}/bin/podman $out/bin/docker
   '';
+
+protoPackageSetupScript = pkgs.writeScript "proto-package-setup" ''
+  ${pkgs.protobuf}/bin/protoc --proto_path=./proto \
+	--go_out=./proto --go_opt=Mimage.proto="/;image" \
+	--go-grpc_out=./proto --go-grpc_opt=paths=source_relative --go-grpc_opt=Mimage.proto=/ \
+	./proto/image.proto
+'';
+
 in
 pkgs.mkShell {
   # nativeBuildInputs is usually what you want -- tools you need to run
@@ -40,5 +48,6 @@ pkgs.mkShell {
   shellHook = ''
     # Install required configuration
     ${podmanSetupScript}
+    ${protoPackageSetupScript}
   '';
 }
