@@ -9,7 +9,7 @@ function host {
 	chown $(logname): /tmp/nl-{client,server}
 	ln -s /tmp/nl-client ./nl-client
 	ln -s /tmp/nl-server ./nl-server
-	chown $(logname): ./nl-client ./nl-server
+	chown -h $(logname): ./nl-client ./nl-server
 }
 
 function docker {
