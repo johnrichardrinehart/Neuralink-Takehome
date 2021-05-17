@@ -109,5 +109,7 @@ do this because I think in a corporate/production environment reproducibility an
 ## GitHub Actions
 I also implemented a build system that would make release binaries available to the Neuralink team in case there were any problem building my software. It triggers builds on each push (done with `nix` flakes since it's the most reproducible) and pushes binary releases on each tag event. This is a simple, but nice thing to have and can easily be plugged into AWS ECS/similar to automate deployments. The `docker` build of this repo can similiarly be pushed to ECR/similar if the deployment environment is container-based. Neat :).
 
+The component of the GitHub Action that runs the `nix` flake executes all tests and compiles the code. So, any issue with my tests or in being able to compile will be visible as a failure to build in the GitHub Actions history.
+
 ## Conclusion
 Thanks for taking the time to consider my application and review my code. I hope it was enjoyable for you and I hope to hear from you soon!
