@@ -1,0 +1,15 @@
+FROM golang:1.15-alpine
+# fetch protobuf/gRPC compilers
+RUN apk add --no-cache protobuf git \
+  && GO111MODULE=on go get google.golang.org/protobuf/cmd/protoc-gen-go@v1.26 \
+  && GO111MODULE=on go get google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1 \
+  && cp /go/bin/protoc-gen-go /usr/bin/
+# build the client
+WORKDIR /tmp/build
+ADD . .
+RUN protoc --proto_path=./proto \
+	    --go_out=./proto --go_opt=Mimage.proto="/;image" \
+	    --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --go-grpc_opt=Mimage.proto=/ \
+	    ./proto/image.proto
+RUN go build -o /etc/nl-client ./client
+ENTRYPOINT [ "/etc/nl-client" ]
